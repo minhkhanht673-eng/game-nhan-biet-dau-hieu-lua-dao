@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Scam Detector Ultimate</title>
+<style>
+body {margin:0;font-family:'Segoe UI';background:linear-gradient(135deg,#020617,#1e293b);color:white;text-align:center}
+.container{max-width:800px;margin:auto;padding:20px}
+.card{background:#1e293b;padding:25px;border-radius:20px;margin-top:20px;box-shadow:0 10px 30px rgba(0,0,0,0.5)}
+button{padding:12px 20px;margin:10px;border:none;border-radius:12px;cursor:pointer;font-size:16px;transition:.2s}
+button:hover{transform:scale(1.05)}
+.safe{background:#22c55e}.scam{background:#ef4444}
+.timer{color:#facc15}
+.progress{height:10px;background:#334155;border-radius:10px;margin-top:15px;overflow:hidden}
+.bar{height:100%;width:0%;background:#22c55e}
+input{padding:10px;border-radius:10px;border:none;margin-top:10px}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>🛡️ Scam Detector Ultimate</h1>
+
+<div id="login">
+<p>Nhập tên của bạn:</p>
+<input id="username" placeholder="Tên...">
+<br>
+<button onclick="startGame()">Bắt đầu</button>
+</div>
+
+<div id="game" style="display:none">
+<div class="card">
+<p id="story"></p>
+<p id="question"></p>
+<button class="safe" onclick="answer('safe')">✅ An toàn</button>
+<button class="scam" onclick="answer('scam')">⚠️ Lừa đảo</button>
+<p id="result"></p>
+<div class="timer">⏳ <span id="time">10</span>s</div>
+<div class="progress"><div class="bar" id="bar"></div></div>
+<p id="score"></p>
+</div>
+</div>
+
+<div id="leaderboard" style="display:none">
+<h2>🏆 Bảng xếp hạng</h2>
+<ul id="rank"></ul>
+<button onclick="location.reload()">Chơi lại</button>
+</div>
+
+</div>
+
+<script>
+const questions=[
+{text:"Bạn nhận link http://faceb00k.xyz",correct:"scam",story:"Bạn vừa nhận tin nhắn từ người lạ",explain:"Link giả"},
+{text:"Trang có https và ổ khóa",correct:"safe",story:"Bạn vào web mua hàng",explain:"Bảo mật"},
+{text:"Đầu tư lãi 50%/ngày",correct:"scam",story:"Một người rủ đầu tư",explain:"Phi thực tế"},
+{text:"Email yêu cầu OTP",correct:"scam",story:"Bạn nhận email ngân hàng",explain:"Không chia OTP"},
+{text:"Website có hotline rõ",correct:"safe",story:"Bạn kiểm tra web",explain:"Minh bạch"}
+];
+
+let i=0,score=0,time=10,timer,user="";
+
+function startGame(){
+user=document.getElementById('username').value||"Ẩn danh";
+document.getElementById('login').style.display='none';
+document.getElementById('game').style.display='block';
+load();}
+
+function load(){
+let q=questions[i];
+document.getElementById('question').innerText=q.text;
+document.getElementById('story').innerText="📖 "+q.story;
+document.getElementById('result').innerText="";
+time=10;
+clearInterval(timer);
+timer=setInterval(()=>{
+time--;document.getElementById('time').innerText=time;
+if(time==0){clearInterval(timer);next();}},1000);
+updateBar();}
+
+function answer(c){
+clearInterval(timer);
+let q=questions[i];
+if(c==q.correct){score++;document.getElementById('result').innerText="✅ "+q.explain}
+else{document.getElementById('result').innerText="❌ "+q.explain}
+setTimeout(next,1200);
+}
+
+function next(){
+i++;
+if(i<questions.length){load();}
+else end();}
+
+function updateBar(){
+document.getElementById('bar').style.width=(i/questions.length*100)+"%"}
+
+function end(){
+document.getElementById('game').style.display='none';
+document.getElementById('leaderboard').style.display='block';
+let data=JSON.parse(localStorage.getItem('rank')||"[]");
+data.push({name:user,score:score});
+data.sort((a,b)=>b.score-a.score);
+localStorage.setItem('rank',JSON.stringify(data));
+
+let html="";
+data.slice(0,5).forEach(r=>{html+=`<li>${r.name}: ${r.score}</li>`});
+document.getElementById('rank').innerHTML=html;
+}
+</script>
+</body>
+</html>
